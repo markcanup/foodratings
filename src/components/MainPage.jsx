@@ -9,15 +9,15 @@ export default function MainPage() {
   const [users, setUsers] = useState([])
   const [cuisines, setCuisines] = useState([])
 
-  const [selectedUserId, setSelectedUserId] = useState('')
-  const [dishFilter, setDishFilter] = useState('')
-  const [restaurantFilter, setRestaurantFilter] = useState('')
-  const [selectedCuisineId, setSelectedCuisineId] = useState('')
+  const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('prefSelectedUserId') || '')
+  const [dishFilter, setDishFilter] = useState(localStorage.getItem('prefDishFilter') || '')
+  const [restaurantFilter, setRestaurantFilter] = useState(localStorage.getItem('prefRestaurantFilter') || '')
+  const [selectedCuisineId, setSelectedCuisineId] = useState(localStorage.getItem('prefSelectedCuisineId') || '')
   const [showFilters, setShowFilters] = useState(false)
   const [showSorts, setShowSorts] = useState(false)
   const [showDisplayOptions, setShowDisplayOptions] = useState(false)
-  const [sortOption, setSortOption] = useState('alpha')
-  const [displayMode, setDisplayMode] = useState('summary')
+  const [sortOption, setSortOption] = useState(localStorage.getItem('prefSortOption') || 'alpha')
+  const [displayMode, setDisplayMode] = useState(localStorage.getItem('prefDisplayMode') || 'summary')
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -119,7 +119,11 @@ export default function MainPage() {
       {showSorts && (
         <div style={{ marginTop: '1rem' }}>
           <label>Sort by:
-            <select value={sortOption} onChange={e => setSortOption(e.target.value)}>
+            <select value={sortOption} onChange={e => {
+		setSortOption(e.target.value)
+		localStorage.setItem('prefSortOption', e.target.value)
+		setShowSorts(false)
+	    }}>
               <option value="alpha">Alphabetical (A-Z)</option>
               <option value="alpha_rev">Alphabetical (Z-A)</option>
               <option value="rating">Restaurant Rating (Best to Worst)</option>
@@ -134,7 +138,11 @@ export default function MainPage() {
       {showDisplayOptions && (
         <div style={{ marginTop: '1rem' }}>
           <label>Display mode:
-            <select value={displayMode} onChange={e => setDisplayMode(e.target.value)}>
+            <select value={displayMode} onChange={e => {
+		setDisplayMode(e.target.value)
+		localStorage.setItem('prefDisplayMode', e.target.value)
+		setShowDisplayOptions(false)
+	    }}>
               <option value="summary">Rating Summary</option>
               <option value="dishes">Dish List</option>
               <option value="bare">Bare</option>
@@ -146,7 +154,11 @@ export default function MainPage() {
       {showFilters && (
         <div style={{ marginTop: '1rem' }}>
           <label>Filter by person:
-            <select value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}>
+            <select value={selectedUserId} onChange={e => {
+		setSelectedUserId(e.target.value)
+		localStorage.setItem('prefSelectedUserId', e.target.value)
+		setShowFilters(false)
+	    }}>
               <option value="">-- All --</option>
               {users.map(u => (
                 <option key={u.id} value={u.id}>{u.name}</option>
@@ -159,14 +171,22 @@ export default function MainPage() {
             <input
               type="text"
               value={dishFilter}
-              onChange={e => setDishFilter(e.target.value)}
+              onChange={e => {
+		  setDishFilter(e.target.value)
+		  localStorage.setItem('prefDishFilter', e.target.value)
+		  //setShowFilters(false)
+	      }}
               placeholder="Search dishes"
             />
           </label>
           <br />
 
           <label>Filter by cuisine:
-            <select value={selectedCuisineId} onChange={e => setSelectedCuisineId(e.target.value)}>
+            <select value={selectedCuisineId} onChange={e => {
+		setSelectedCuisineId(e.target.value)
+		localStorage.setItem('prefSelectedCuisineId', e.target.value)
+		setShowFilters(false)
+	    }}>
               <option value="">-- All --</option>
               {cuisines
 		.sort((a, b) => a.name.localeCompare(b.name))
@@ -181,14 +201,18 @@ export default function MainPage() {
             <input
               type="text"
               value={restaurantFilter}
-              onChange={e => setRestaurantFilter(e.target.value)}
+              onChange={e => {
+		  setRestaurantFilter(e.target.value)
+		  localStorage.setItem('prefRestaurantFilter', e.target.value)
+		  //setShowFilters(false)
+	      }}
               placeholder="Search restaurants"
             />
           </label>
         </div>
       )}
 
-      <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+      <div style={{ marginTop: '2rem', marginBottom: '1rem', fontSize: '80%' }}>
 	{alphabet.map(letter => (
 	  <a
 	    key={letter}
