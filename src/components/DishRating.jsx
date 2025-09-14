@@ -13,6 +13,8 @@ export default function DishRating() {
 
   const hasInitialized = useRef(false)
 
+  maybeClearOldPrefs()
+
   useEffect(() => {
     const isNew = dishId === 'new';
     if (isNew) {
@@ -60,7 +62,7 @@ export default function DishRating() {
       setDish(dishData || null)
       // If there are no ratings, create a blank one
       if (!ratingsData || ratingsData.length === 0) {
-	const savedDate = localStorage.getItem('lastSelectedDate')
+	const savedDate = getPref('lastSelectedDate', 0)
 	const defaultDate = savedDate || new Date().toISOString().split('T')[0]
 	setRatings([{
 	  user_id: usersData?.[0]?.id?.toString() || '',
@@ -179,7 +181,7 @@ export default function DishRating() {
 
 
   const addRating = () => {
-    const savedDate = localStorage.getItem('lastSelectedDate')
+    const savedDate = getPref('lastSelectedDate', 0)
     const defaultDate = savedDate || new Date().toISOString().split('T')[0]
     setRatings([...ratings, {
       user_id: users.length > 0 ? users[0].id.toString() : '',
@@ -358,4 +360,20 @@ export default function DishRating() {
   )
 }
 
+function maybeClearOldPrefs() {
+  const lastVisit = localStorage.getItem('lastVisitTimestamp')
+  const now = Date.now()
+  const THIRTY_MINUTES = 30 * 60 * 1000
+
+  if (!lastVisit || now - parseInt(lastVisit) > THIRTY_MINUTES) {
+    localStorage.removeItem('lastSelectedDate')
+  }
+
+  localStorage.setItem('lastVisitTimestamp', now.toString())
+}
+
+function getPref(key, defaultValue)
+{
+    return localStorage.getItem(key) || defaultValue
+}
 

@@ -9,20 +9,23 @@ export default function MainPage() {
   const [users, setUsers] = useState([])
   const [cuisines, setCuisines] = useState([])
 
-  const [selectedUserId, setSelectedUserId] = useState(localStorage.getItem('prefSelectedUserId') || '')
-  const [dishFilter, setDishFilter] = useState(localStorage.getItem('prefDishFilter') || '')
-  const [restaurantFilter, setRestaurantFilter] = useState(localStorage.getItem('prefRestaurantFilter') || '')
-  const [selectedCuisineId, setSelectedCuisineId] = useState(localStorage.getItem('prefSelectedCuisineId') || '')
+  maybeClearOldPrefs()
+
+  const [selectedUserId, setSelectedUserId] = useState(getPref('prefSelectedUserId', ''))
+  const [dishFilter, setDishFilter] = useState(getPref('prefDishFilter', ''))
+  const [restaurantFilter, setRestaurantFilter] = useState(getPref('prefRestaurantFilter', ''))
+  const [selectedCuisineId, setSelectedCuisineId] = useState(getPref('prefSelectedCuisineId', ''))
   const [showFilters, setShowFilters] = useState(false)
   const [showSorts, setShowSorts] = useState(false)
   const [showDisplayOptions, setShowDisplayOptions] = useState(false)
-  const [sortOption, setSortOption] = useState(localStorage.getItem('prefSortOption') || 'alpha')
-  const [displayMode, setDisplayMode] = useState(localStorage.getItem('prefDisplayMode') || 'summary')
+  const [sortOption, setSortOption] = useState(getPref('prefSortOption', 'alpha'))
+  const [displayMode, setDisplayMode] = useState(getPref('prefDisplayMode', 'summary'))
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   useEffect(() => {
     document.title = 'Restaurant Ratings - Main Page'
+
     const fetchData = async () => {
       const { data: restData } = await supabase.from('restaurants').select('*')
       const { data: dishData } = await supabase.from('dishes').select('*')
@@ -288,3 +291,23 @@ export default function MainPage() {
   )
 }
 
+function maybeClearOldPrefs() {
+  const lastVisit = localStorage.getItem('lastVisitTimestamp');
+  const now = Date.now();
+  const THIRTY_MINUTES = 30 * 60 * 1000;
+
+  if (!lastVisit || now - parseInt(lastVisit) > THIRTY_MINUTES) {
+    localStorage.removeItem('prefSortOption');
+    localStorage.removeItem('prefSelectedUserId');
+    localStorage.removeItem('prefDishFilter');
+    localStorage.removeItem('prefRestaurantFilter');
+    localStorage.removeItem('prefSelectedCuisineId');
+  }
+
+  localStorage.setItem('lastVisitTimestamp', now.toString());
+}
+
+function getPref(key, defaultValue) 
+{
+    return localStorage.getItem(key) || defaultValue
+}
