@@ -2,6 +2,10 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
+const LAST_SELECTED_DATE_KEY = 'lastSelectedDate'
+const LAST_SELECTED_DATE_TIMESTAMP_KEY = 'lastSelectedDateTimestamp'
+const RATING_DATE_PREF_WINDOW_MS = 30 * 60 * 1000
+
 export default function DishRating() {
   const { restaurantId, dishId } = useParams()
   const navigate = useNavigate()
@@ -13,12 +17,10 @@ export default function DishRating() {
 
   const hasInitialized = useRef(false)
 
-  maybeClearOldPrefs()
-
   useEffect(() => {
-    const isNew = dishId === 'new';
+    const isNew = dishId === 'new'
     if (isNew) {
-      createNewDish();
+      createNewDish()
     }
   }, [window.location.search])  // triggers on ?ts= change
 
@@ -30,15 +32,15 @@ export default function DishRating() {
 
     const createNewDish = async () => {
       const { data: newDish, error } = await supabase
-	.from('dishes')
-	.insert({ name: '', comments: '', restaurant_id: restaurantId })
-	.select()
-	.single()
+        .from('dishes')
+        .insert({ name: '', comments: '', restaurant_id: restaurantId })
+        .select()
+        .single()
 
       if (error) {
-	console.error('Error creating new dish:', error.message)
-	alert(`There was a problem creating a new dish: ${error.message} Please try again.`)
-	return
+        console.error('Error creating new dish:', error.message)
+        alert(`There was a problem creating a new dish: ${error.message} Please try again.`)
+        return
       }
       navigate(`/restaurant/${restaurantId}/dish/${newDish.id}`, { replace: true })
     }
@@ -53,27 +55,25 @@ export default function DishRating() {
       setLoading(true)
 
       const [{ data: usersData }, { data: dishData }, { data: ratingsData }] = await Promise.all([
-	supabase.from('users').select('*'),
-	supabase.from('dishes').select('*').eq('id', dishId).single(),
-	supabase.from('ratings').select('*').eq('dish_id', dishId),
+        supabase.from('users').select('*'),
+        supabase.from('dishes').select('*').eq('id', dishId).single(),
+        supabase.from('ratings').select('*').eq('dish_id', dishId),
       ])
 
       setUsers(usersData || [])
       setDish(dishData || null)
       // If there are no ratings, create a blank one
       if (!ratingsData || ratingsData.length === 0) {
-	const savedDate = getPref('lastSelectedDate', 0)
-	const defaultDate = savedDate || new Date().toISOString().split('T')[0]
-	setRatings([{
-	  user_id: usersData?.[0]?.id?.toString() || '',
-	  rating: '',
-	  comments: '',
-	  date_rated: defaultDate
-	}])
+        const defaultDate = getDefaultRatingDate()
+        setRatings([{
+          user_id: usersData?.[0]?.id?.toString() || '',
+          rating: '',
+          comments: '',
+          date_rated: defaultDate
+        }])
       } else {
-	setRatings(ratingsData)
+        setRatings(ratingsData)
       }
-//      setRatings(ratingsData || [])
       setLoading(false)
     }
 
@@ -91,12 +91,12 @@ export default function DishRating() {
     setDish(updatedDish)
     if (dishId) {
       const { error } = await supabase
-	.from('dishes')
-	.update({ [field]: value })
-	.eq('id', dishId)
+        .from('dishes')
+        .update({ [field]: value })
+        .eq('id', dishId)
       if (error) {
-	console.error('Error updating dish:', error)
-	alert(`There was a problem saving the dish: ${error.message}. Please try again.`)
+        console.error('Error updating dish:', error)
+        alert(`There was a problem saving the dish: ${error.message}. Please try again.`)
       }
     }
   }
@@ -110,34 +110,34 @@ export default function DishRating() {
 
     try {
       if (rating.id) {
-	const { error } = await supabase
-	  .from('ratings')
-	  .update(rating)
-	  .eq('id', rating.id)
+        const { error } = await supabase
+          .from('ratings')
+          .update(rating)
+          .eq('id', rating.id)
 
-	if (error) throw error
+        if (error) throw error
       } else {
-	const insertData = {
-	  ...rating,
-	  dish_id: dish.id,
-	  rating: rating.rating ? parseInt(rating.rating) : null,
-	  user_id: rating.user_id || null,
-	  date_rated: rating.date_rated || null,
-	  comments: rating.comments || null
-	}
-	const { data, error } = await supabase
-	  .from('ratings')
-	  .insert(insertData)
-	  .select()
-	  .single()
+        const insertData = {
+          ...rating,
+          dish_id: dish.id,
+          rating: rating.rating ? parseInt(rating.rating) : null,
+          user_id: rating.user_id || null,
+          date_rated: rating.date_rated || null,
+          comments: rating.comments || null
+        }
+        const { data, error } = await supabase
+          .from('ratings')
+          .insert(insertData)
+          .select()
+          .single()
 
-	if (error) throw error
+        if (error) throw error
 
-	updatedRatings[index] = data
-	setRatings(updatedRatings)
+        updatedRatings[index] = data
+        setRatings(updatedRatings)
       }
       if (rating.date_rated) {
-	localStorage.setItem('lastSelectedDate', rating.date_rated)
+        saveDefaultRatingDate(rating.date_rated)
       }
     } catch (err) {
       console.error('Error saving rating:', err, rating)
@@ -179,10 +179,8 @@ export default function DishRating() {
     setDish((prev) => ({ ...prev, image_url: null }))
   }
 
-
   const addRating = () => {
-    const savedDate = getPref('lastSelectedDate', 0)
-    const defaultDate = savedDate || new Date().toISOString().split('T')[0]
+    const defaultDate = getDefaultRatingDate()
     setRatings([...ratings, {
       user_id: users.length > 0 ? users[0].id.toString() : '',
       rating: '',
@@ -214,7 +212,6 @@ export default function DishRating() {
     5: 'Favorite'
   }
 
-    //alert(window.location.pathname)
   if (loading) return <div>Loading...</div>
   if (!dish && dishId) return <div>Dish not found</div>
 
@@ -225,80 +222,80 @@ export default function DishRating() {
       <input
         type="text"
         value={dish.name || ''}
-	onChange={(e) => handleDishChange('name', e.target.value)}
+        onChange={(e) => handleDishChange('name', e.target.value)}
         placeholder="Dish Name"
       />
 
       <textarea
-	value={dish.comments || ''}
-	onChange={(e) => handleDishChange('comments', e.target.value)}
-	placeholder="Dish comments (e.g., adds/removes)"
-	style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+        value={dish.comments || ''}
+        onChange={(e) => handleDishChange('comments', e.target.value)}
+        placeholder="Dish comments (e.g., adds/removes)"
+        style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
       />
 
       <h4>Dish Image</h4>
 
       {dish.image_url && (
-	<img src={dish.image_url} alt="Dish" style={{ maxWidth: '300px', marginBottom: '1rem' }} />
+        <img src={dish.image_url} alt="Dish" style={{ maxWidth: '300px', marginBottom: '1rem' }} />
       )}
       {dish.image_url && (
-	<button onClick={handleDeleteImage}>
-	    Delete Image
-	</button>
+        <button onClick={handleDeleteImage}>
+            Delete Image
+        </button>
       )}
 
       <input
-	type="file"
-	accept="image/*"
-	onChange={async (e) => {
-	  const file = e.target.files[0];
-	  if (!file) return;
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files[0]
+          if (!file) return
 
-	  const fileExt = file.name.split('.').pop();
-	  const fileName = `${dish.id}-${Date.now()}.${fileExt}`;
-	  const filePath = `${fileName}`;
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${dish.id}-${Date.now()}.${fileExt}`
+          const filePath = `${fileName}`
 
-	  let { error: uploadError } = await supabase.storage
-	    .from('dish-images')
-	    .upload(filePath, file);
+          let { error: uploadError } = await supabase.storage
+            .from('dish-images')
+            .upload(filePath, file)
 
-	  if (uploadError) {
-	    console.error('Upload error:', uploadError);
-	    alert(`Error uploading image.: ${uploadError.message}`);
-	    return;
-	  }
+          if (uploadError) {
+            console.error('Upload error:', uploadError)
+            alert(`Error uploading image.: ${uploadError.message}`)
+            return
+          }
 
-	  const { data: { publicUrl } } = supabase.storage
-	    .from('dish-images')
-	    .getPublicUrl(filePath);
+          const { data: { publicUrl } } = supabase.storage
+            .from('dish-images')
+            .getPublicUrl(filePath)
 
-	  const { error: updateError } = await supabase
-	    .from('dishes')
-	    .update({ image_url: publicUrl })
-	    .eq('id', dish.id);
+          const { error: updateError } = await supabase
+            .from('dishes')
+            .update({ image_url: publicUrl })
+            .eq('id', dish.id)
 
-	  if (updateError) {
-	    console.error('Error saving image URL to dish:', updateError);
-	    alert('Error saving image reference.');
-	  } else {
-	    setDish({ ...dish, image_url: publicUrl });
-	  }
-	}}
+          if (updateError) {
+            console.error('Error saving image URL to dish:', updateError)
+            alert('Error saving image reference.')
+          } else {
+            setDish({ ...dish, image_url: publicUrl })
+          }
+        }}
       />
 
 
       <h3>Ratings</h3>
       {ratings.map((rating, index) => (
-	<div
-	  key={index}
-	  style={{
-	    border: '1px solid #ccc',
-	    borderRadius: '8px',
-	    padding: '1rem',
-	    marginBottom: '1rem',
-	    backgroundColor: '#f9f9f9'
-	  }}
-	>
+        <div
+          key={index}
+          style={{
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            padding: '1rem',
+            marginBottom: '1rem',
+            backgroundColor: '#f9f9f9'
+          }}
+        >
 
           <select
             value={rating.user_id || ''}
@@ -310,29 +307,29 @@ export default function DishRating() {
             ))}
           </select>
 
-	  <div style={{ margin: '1rem 0' }}>
-	    <label><strong>Rating</strong></label>
-	    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.5rem' }}>
-	      {[1, 2, 3, 4, 5].map(value => (
-		<button
-		  type="button"
-		  key={value}
-		  onClick={() => handleRatingChange(index, 'rating', value)}
-		  style={{
-		    textAlign: 'left',
-		    padding: '0.5rem',
-		    backgroundColor: parseInt(rating.rating) === value ? '#007BFF' : '#eee',
-		    color: parseInt(rating.rating) === value ? '#fff' : '#000',
-		    border: '1px solid #ccc',
-		    borderRadius: '4px',
-		    cursor: 'pointer'
-		  }}
-		>
-		  {value} ★ - {descriptions[value]}
-		</button>
-	      ))}
-	    </div>
-	  </div>
+          <div style={{ margin: '1rem 0' }}>
+            <label><strong>Rating</strong></label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.5rem' }}>
+              {[1, 2, 3, 4, 5].map(value => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => handleRatingChange(index, 'rating', value)}
+                  style={{
+                    textAlign: 'left',
+                    padding: '0.5rem',
+                    backgroundColor: parseInt(rating.rating) === value ? '#007BFF' : '#eee',
+                    color: parseInt(rating.rating) === value ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {value} ★ - {descriptions[value]}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <input
             type="date"
@@ -344,9 +341,9 @@ export default function DishRating() {
             onChange={(e) => handleRatingChange(index, 'comments', e.target.value)}
             placeholder="Rating Comments"
           />
-	  <div style={{ marginTop: '1rem' }}>
-	    <button onClick={() => deleteRating(index)}>Delete Rating</button>
-	  </div>
+          <div style={{ marginTop: '1rem' }}>
+            <button onClick={() => deleteRating(index)}>Delete Rating</button>
+          </div>
         </div>
       ))}
       <button onClick={addRating}>Add Another Rating</button>
@@ -360,20 +357,21 @@ export default function DishRating() {
   )
 }
 
-function maybeClearOldPrefs() {
-  const lastVisit = localStorage.getItem('lastVisitTimestamp')
+function getDefaultRatingDate() {
+  const savedDate = localStorage.getItem(LAST_SELECTED_DATE_KEY)
+  const savedTimestamp = parseInt(localStorage.getItem(LAST_SELECTED_DATE_TIMESTAMP_KEY) || '', 10)
   const now = Date.now()
-  const THIRTY_MINUTES = 30 * 60 * 1000
 
-  if (!lastVisit || now - parseInt(lastVisit) > THIRTY_MINUTES) {
-    localStorage.removeItem('lastSelectedDate')
+  if (!savedDate || Number.isNaN(savedTimestamp) || now - savedTimestamp > RATING_DATE_PREF_WINDOW_MS) {
+    localStorage.removeItem(LAST_SELECTED_DATE_KEY)
+    localStorage.removeItem(LAST_SELECTED_DATE_TIMESTAMP_KEY)
+    return new Date().toISOString().split('T')[0]
   }
 
-  localStorage.setItem('lastVisitTimestamp', now.toString())
+  return savedDate
 }
 
-function getPref(key, defaultValue)
-{
-    return localStorage.getItem(key) || defaultValue
+function saveDefaultRatingDate(date) {
+  localStorage.setItem(LAST_SELECTED_DATE_KEY, date)
+  localStorage.setItem(LAST_SELECTED_DATE_TIMESTAMP_KEY, Date.now().toString())
 }
-
