@@ -101,6 +101,13 @@ export default function DishRating() {
     }
   }
 
+  const handleDishNameChange = async (event) => {
+    const { value } = event.target
+    const nextValue = formatDishNameInput(dish?.name || '', value)
+
+    await handleDishChange('name', nextValue)
+  }
+
   const handleRatingChange = async (index, field, value) => {
     const updatedRatings = [...ratings]
     updatedRatings[index] = { ...updatedRatings[index], [field]: value }
@@ -222,7 +229,7 @@ export default function DishRating() {
       <input
         type="text"
         value={dish.name || ''}
-        onChange={(e) => handleDishChange('name', e.target.value)}
+        onChange={handleDishNameChange}
         placeholder="Dish Name"
       />
 
@@ -369,6 +376,37 @@ function getDefaultRatingDate() {
   }
 
   return savedDate
+}
+
+function formatDishNameInput(previousValue, nextValue) {
+  if (!nextValue) {
+    return nextValue
+  }
+
+  let formattedValue = ''
+
+  for (let index = 0; index < nextValue.length; index += 1) {
+    const character = nextValue[index]
+    const previousCharacter = index === 0 ? '' : nextValue[index - 1]
+    const startsWord = index === 0 || /[\s/-]/.test(previousCharacter)
+
+    if (startsWord) {
+      formattedValue += character.toUpperCase()
+      continue
+    }
+
+    const previousInputCharacter = previousValue[index]
+    const isNewCharacter = previousInputCharacter !== character
+
+    if (isNewCharacter && character >= 'A' && character <= 'Z') {
+      formattedValue += character
+      continue
+    }
+
+    formattedValue += character
+  }
+
+  return formattedValue
 }
 
 function saveDefaultRatingDate(date) {
