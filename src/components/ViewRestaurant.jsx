@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import PageHeader from './PageHeader'
 
 export default function ViewRestaurant() {
   const { id } = useParams()
@@ -94,47 +95,49 @@ export default function ViewRestaurant() {
 
   return (
     <div>
-      <h1>{restaurant?.name}</h1>
+      <div className="top-controls">
+        <PageHeader title={restaurant?.name || 'Restaurant'} />
 
-      <div style={{ marginTop: '1rem' }}>
-        <Link to={`/restaurant/${id}/add-dish`}>+ Add Dish</Link> |{' '}
-        <Link to={`/restaurant/${id}/edit`}>Edit Restaurant</Link> |{' '}
-        <Link to="#" onClick={(e) => { e.preventDefault(); setShowFilters(prev => !prev) }}>Filter</Link> |{' '}
-        <Link to="#" onClick={(e) => { e.preventDefault(); setShowSorts(prev => !prev) }}>Sort</Link>
+        <div style={{ marginTop: '1rem' }}>
+          <Link to={`/restaurant/${id}/add-dish`}>+ Add Dish</Link> |{' '}
+          <Link to={`/restaurant/${id}/edit`}>Edit Restaurant</Link> |{' '}
+          <Link to="#" onClick={(e) => { e.preventDefault(); setShowFilters(prev => !prev) }}>Filter</Link> |{' '}
+          <Link to="#" onClick={(e) => { e.preventDefault(); setShowSorts(prev => !prev) }}>Sort</Link>
+        </div>
+
+        {showFilters && (
+          <div style={{ marginTop: '1rem' }}>
+            <label>Filter by person:
+              <select value={filterUserId} onChange={e => setFilterUserId(e.target.value)}>
+                <option value="">All</option>
+                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </label>
+            <label style={{ marginLeft: '1rem' }}>Filter by dish:
+              <input value={filterDish} onChange={e => setFilterDish(e.target.value)} />
+            </label>
+          </div>
+        )}
+
+        {showSorts && (
+          <div style={{ marginTop: '1rem' }}>
+            <label>
+              Sort by:
+              <select value={sortOption} onChange={e => setSortOption(e.target.value)}>
+                <option value="alpha">Alphabetical (A–Z)</option>
+                <option value="alpha_rev">Alphabetical (Z–A)</option>
+                <option value="rating">Average Rating (Best to Worst)</option>
+                <option value="rating_rev">Average Rating (Worst to Best)</option>
+                <option value="recent">Last Rated (Most to Least Recent)</option>
+                <option value="recent_rev">Last Rated (Least to Most Recent)</option>
+              </select>
+            </label>
+          </div>
+        )}
+
       </div>
 
-      {showFilters && (
-        <div style={{ marginTop: '1rem' }}>
-          <label>Filter by person:
-            <select value={filterUserId} onChange={e => setFilterUserId(e.target.value)}>
-              <option value="">All</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
-          </label>
-          <label style={{ marginLeft: '1rem' }}>Filter by dish:
-            <input value={filterDish} onChange={e => setFilterDish(e.target.value)} />
-          </label>
-        </div>
-      )}
-
-      {showSorts && (
-        <div style={{ marginTop: '1rem' }}>
-          <label>
-            Sort by:
-            <select value={sortOption} onChange={e => setSortOption(e.target.value)}>
-              <option value="alpha">Alphabetical (A–Z)</option>
-              <option value="alpha_rev">Alphabetical (Z–A)</option>
-              <option value="rating">Average Rating (Best to Worst)</option>
-              <option value="rating_rev">Average Rating (Worst to Best)</option>
-              <option value="recent">Last Rated (Most to Least Recent)</option>
-              <option value="recent_rev">Last Rated (Least to Most Recent)</option>
-            </select>
-          </label>
-        </div>
-      )}
-
-    <h2>Dishes</h2>
-    {sortedDishes.length === 0 && <p>No matching dishes found.</p>}
+      {sortedDishes.length === 0 && <p>No matching dishes found.</p>}
       <ul>
         {sortedDishes.map(dish => (
           <li key={dish.id} style={{ marginBottom: '1rem' }}>
@@ -161,4 +164,3 @@ export default function ViewRestaurant() {
     </div>
   )
 }
-

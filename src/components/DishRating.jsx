@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import PageHeader from './PageHeader'
 
 const LAST_SELECTED_DATE_KEY = 'lastSelectedDate'
 const LAST_SELECTED_DATE_TIMESTAMP_KEY = 'lastSelectedDateTimestamp'
@@ -11,6 +12,7 @@ export default function DishRating() {
   const navigate = useNavigate()
 
   const [dish, setDish] = useState(null)
+  const [restaurant, setRestaurant] = useState(null)
   const [ratings, setRatings] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -60,8 +62,21 @@ export default function DishRating() {
         supabase.from('ratings').select('*').eq('dish_id', dishId),
       ])
 
+      const resolvedRestaurantId = restaurantId || dishData?.restaurant_id
+      let restaurantData = null
+
+      if (resolvedRestaurantId) {
+        const { data } = await supabase
+          .from('restaurants')
+          .select('id, name')
+          .eq('id', resolvedRestaurantId)
+          .single()
+        restaurantData = data
+      }
+
       setUsers(usersData || [])
       setDish(dishData || null)
+      setRestaurant(restaurantData || null)
       // If there are no ratings, create a blank one
       if (!ratingsData || ratingsData.length === 0) {
         const defaultDate = getDefaultRatingDate()
@@ -78,7 +93,7 @@ export default function DishRating() {
     }
 
     loadData()
-  }, [dishId])
+  }, [dishId, restaurantId])
 
   const updateDishField = async (field, value) => {
     const updatedDish = { ...dish, [field]: value }
@@ -224,6 +239,13 @@ export default function DishRating() {
 
   return (
     <div>
+      <div className="top-controls">
+        <PageHeader
+          title={restaurant?.name || 'Restaurant'}
+          titleTo={restaurant ? `/restaurant/${restaurant.id}` : undefined}
+        />
+      </div>
+
       <h2>Dish</h2>
 
       <input

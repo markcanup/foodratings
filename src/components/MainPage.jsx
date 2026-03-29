@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import PageHeader from './PageHeader'
 
 export default function MainPage() {
   const [restaurants, setRestaurants] = useState([])
@@ -136,7 +137,7 @@ export default function MainPage() {
   return (
     <div>
     <div className="top-controls">
-      <h1>Restaurant Ratings</h1>
+      <PageHeader title="Food Ratings" />
       <div style={{ marginTop: '1rem' }}>
         <Link to="/add-restaurant">+ Add Restaurant</Link> |{' '}
         <Link to="#" onClick={(e) => { e.preventDefault(); setShowFilters(p => !p) }}>Filter</Link> |{' '}
