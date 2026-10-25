@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import PageHeader from './PageHeader'
+import './restaurant-form.css'
 
 export default function ViewRestaurant() {
   const { id } = useParams()
@@ -21,16 +22,21 @@ export default function ViewRestaurant() {
       setRestaurant(restaurantData)
 
       const { data: dishData } = await supabase.from('dishes').select('*').eq('restaurant_id', id)
-      setDishes(dishData)
+      const restaurantDishes = dishData || []
+      setDishes(restaurantDishes)
 
-      const { data: ratingData } = await supabase
-        .from('ratings')
-        .select('*, users(*)')
-        .in('dish_id', dishData.map(d => d.id))
-      setRatings(ratingData)
+      if (restaurantDishes.length > 0) {
+        const { data: ratingData } = await supabase
+          .from('ratings')
+          .select('*, users(*)')
+          .in('dish_id', restaurantDishes.map(d => d.id))
+        setRatings(ratingData || [])
+      } else {
+        setRatings([])
+      }
 
       const { data: userData } = await supabase.from('users').select('*')
-      setUsers(userData)
+      setUsers(userData || [])
     }
 
     fetchData()
@@ -48,6 +54,13 @@ export default function ViewRestaurant() {
     const avg = validRatings.reduce((sum, r) => sum + r.rating, 0) / validRatings.length
     return +avg.toFixed(1)
   }
+
+  const validRestaurantRatings = ratings.filter(rating => typeof rating.rating === 'number')
+  const calculatedRestaurantRating = validRestaurantRatings.length > 0
+    ? +(validRestaurantRatings.reduce((sum, rating) => sum + rating.rating, 0) / validRestaurantRatings.length).toFixed(1)
+    : null
+  const hasRatingOverride = typeof restaurant?.rating === 'number'
+  const restaurantRating = hasRatingOverride ? restaurant.rating : calculatedRestaurantRating
 
   const getMostRecentRatingDateForDish = (dishId) => {
     const dates = (ratingsByDish[dishId] || [])
@@ -136,6 +149,18 @@ export default function ViewRestaurant() {
         )}
 
       </div>
+
+      {(restaurantRating || restaurant?.comments) && (
+        <section className="restaurant-summary" aria-label="Restaurant details">
+          {restaurantRating && (
+            <p>
+              <strong>Restaurant rating:</strong> {restaurantRating} ★
+              {hasRatingOverride ? ' (override)' : ' (calculated from dish ratings)'}
+            </p>
+          )}
+          {restaurant?.comments && <p><strong>Comments:</strong> {restaurant.comments}</p>}
+        </section>
+      )}
 
       {sortedDishes.length === 0 && <p>No matching dishes found.</p>}
       <ul>

@@ -84,6 +84,7 @@ export default function MainPage() {
     getRestaurantDishes(restaurant).flatMap(dish => dish.ratings || [])
 
   const getAverageRating = (restaurant) => {
+    if (typeof restaurant.rating === 'number') return restaurant.rating
     const restaurantRatings = getRestaurantRatings(restaurant).filter(r => typeof r.rating === 'number')
     if (restaurantRatings.length === 0) return null
     const sum = restaurantRatings.reduce((acc, r) => acc + r.rating, 0)
@@ -284,8 +285,16 @@ export default function MainPage() {
               <Link to={`/restaurant/${r.id}`}>
                 <strong>{r.name}</strong>
               </Link>
-              {average && <span style={{ marginLeft: '1rem' }}>{average}★</span>}
+              {average && (
+                <span
+                  style={{ marginLeft: '1rem' }}
+                  title={typeof r.rating === 'number' ? 'Restaurant rating override' : 'Calculated from dish ratings'}
+                >
+                  {average}★{typeof r.rating === 'number' ? ' (override)' : ''}
+                </span>
+              )}
               {mostRecent && <span style={{ marginLeft: '1rem', fontStyle: 'italic' }}>({mostRecent})</span>}
+              {r.comments && <div><em>{r.comments}</em></div>}
 
               {displayMode === 'summary' && (
                 <ul>
