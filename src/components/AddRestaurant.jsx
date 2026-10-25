@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import RestaurantRatingSelector from './RestaurantRatingSelector'
+import './restaurant-form.css'
 
 export default function AddRestaurant() {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    cuisine_id: ''
+    cuisine_id: '',
+    comments: '',
+    rating: ''
   })
   const [cuisines, setCuisines] = useState([])
   const [newCuisine, setNewCuisine] = useState('')
@@ -35,13 +39,20 @@ export default function AddRestaurant() {
       setFormData(prev => ({ ...prev, cuisine_id: newEntry.id }))
       setNewCuisine('')
     } else {
-      alert('Error adding cuisine: ' + error.message)
+      alert('Error adding cuisine: ' + (error?.message || 'Unknown error'))
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const { data, error } = await supabase.from('restaurants').insert([formData]).select()
+    const restaurant = {
+      name: formData.name.trim(),
+      location: formData.location.trim() || null,
+      cuisine_id: formData.cuisine_id || null,
+      comments: formData.comments.trim() || null,
+      rating: formData.rating === '' ? null : Number(formData.rating)
+    }
+    const { data, error } = await supabase.from('restaurants').insert([restaurant]).select()
     if (error) {
       alert('Error: ' + error.message)
     } else {
@@ -51,20 +62,17 @@ export default function AddRestaurant() {
   }
 
   return (
-    <div>
+    <div className="restaurant-form-page">
       <h1>Add Restaurant</h1>
       <form onSubmit={handleSubmit}>
         <label>
           Name:
           <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </label>
-        <br />
-
         <label>
           Location (optional):
           <input type="text" name="location" value={formData.location} onChange={handleChange} />
         </label>
-        <br />
 
         <label>
           Cuisine:
@@ -75,7 +83,6 @@ export default function AddRestaurant() {
             ))}
           </select>
         </label>
-        <br />
 
         <input
           type="text"
@@ -84,11 +91,22 @@ export default function AddRestaurant() {
           onChange={(e) => setNewCuisine(e.target.value)}
         />
         <button type="button" onClick={handleAddCuisine}>Add Cuisine</button>
-        <br />
 
-        <button type="submit">Save</button>
+        <label>
+          Comments (optional):
+          <textarea name="comments" value={formData.comments} onChange={handleChange} />
+        </label>
+
+        <RestaurantRatingSelector
+          value={formData.rating}
+          onChange={(rating) => setFormData(prev => ({ ...prev, rating }))}
+        />
+
+        <div className="restaurant-form-actions">
+          <button type="submit">Save</button>
+          <button type="button" className="secondary-button" onClick={() => navigate('/')}>Cancel</button>
+        </div>
       </form>
     </div>
   )
 }
-

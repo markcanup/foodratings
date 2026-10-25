@@ -1,0 +1,192 @@
+.restaurant-form-page {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.restaurant-form-page form > label {
+  display: block;
+  font-weight: 600;
+}
+
+.restaurant-form-page textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.restaurant-form-page .field-help {
+  display: block;
+  margin: -0.65rem 0 1rem;
+  color: #718096;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.restaurant-rating-selector {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.65rem;
+  background: #f7fafc;
+}
+
+.restaurant-rating-selector legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
+
+.restaurant-rating-selector p {
+  margin: 0 0 0.75rem;
+  color: #718096;
+  font-size: 0.85rem;
+}
+
+.restaurant-rating-selector__options {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.restaurant-rating-selector__options button {
+  margin: 0;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.4rem;
+  background: #fff;
+  color: #2d3748;
+  text-align: left;
+}
+
+.restaurant-rating-selector__options button:hover {
+  background: #ebf8ff;
+}
+
+.restaurant-rating-selector__options button.is-selected {
+  border-color: #2b6cb0;
+  background: #2b6cb0;
+  color: #fff;
+}
+
+.rating-clear-button {
+  margin-top: 0.65rem;
+  border: 1px solid #90cdf4;
+  border-radius: 0.4rem;
+  background: #fff;
+  color: #2b6cb0;
+}
+
+.restaurant-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.restaurant-form-actions button {
+  width: auto;
+  min-width: 7rem;
+  margin: 0;
+  border-radius: 0.45rem;
+}
+
+.restaurant-form-actions .secondary-button,
+.restaurant-linkages .secondary-button {
+  border: 1px solid #90cdf4;
+  background: #fff;
+  color: #2b6cb0;
+}
+
+.restaurant-form-actions .danger-button {
+  background: #c53030;
+}
+
+.restaurant-linkages {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid #bee3f8;
+  border-radius: 0.65rem;
+  background: #f7fafc;
+}
+
+.restaurant-linkages h3 {
+  margin-top: 0;
+}
+
+.restaurant-linkages__merchant {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid #9ae6b4;
+  border-radius: 0.5rem;
+  background: #f0fff4;
+}
+
+.restaurant-linkages__merchant strong,
+.restaurant-linkages__merchant small {
+  display: block;
+}
+
+.restaurant-linkages__merchant small {
+  margin-top: 0.2rem;
+  color: #4a5568;
+}
+
+.restaurant-linkages__merchant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.restaurant-linkages__merchant-actions button,
+.restaurant-linkages__add button {
+  width: auto;
+  margin: 0;
+  border-radius: 0.4rem;
+}
+
+.restaurant-linkages__merchant-actions .remove-button {
+  background: transparent;
+  color: #c53030;
+}
+
+.restaurant-linkages__add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #cbd5e0;
+}
+
+.restaurant-linkages__add select {
+  margin: 0;
+}
+
+.restaurant-linkages__status {
+  margin: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.85rem;
+}
+
+.restaurant-linkages__error {
+  color: #c53030;
+}
+
+.restaurant-summary {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid #2b6cb0;
+  background: #ebf8ff;
+}
+
+.restaurant-summary p {
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 640px) {
+  .restaurant-linkages__merchant,
+  .restaurant-linkages__add {
+    grid-template-columns: 1fr;
+  }
+}
