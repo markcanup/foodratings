@@ -7,6 +7,7 @@ export default function MainPage() {
   const [restaurants, setRestaurants] = useState([])
   const [users, setUsers] = useState([])
   const [cuisines, setCuisines] = useState([])
+  const [isAdmin, setIsAdmin] = useState(false)
 
   maybeClearOldPrefs()
 
@@ -68,6 +69,13 @@ export default function MainPage() {
     }
 
     fetchData()
+
+    const checkAdminAccess = async () => {
+      const { data } = await supabase.rpc('is_app_admin')
+      setIsAdmin(data === true)
+    }
+
+    checkAdminAccess()
   }, [])
 
   const getRestaurantDishes = (restaurant) => restaurant.dishes || []
@@ -137,7 +145,14 @@ export default function MainPage() {
   return (
     <div>
     <div className="top-controls">
-      <PageHeader title="Food Ratings" />
+      <PageHeader
+        title="Food Ratings"
+        actions={isAdmin ? (
+          <Link to="/admin" className="page-header__action" aria-label="Open admin tools" title="Admin tools">
+            <span aria-hidden="true">⚙</span>
+          </Link>
+        ) : null}
+      />
       <div style={{ marginTop: '1rem' }}>
         <Link to="/add-restaurant">+ Add Restaurant</Link> |{' '}
         <Link to="#" onClick={(e) => { e.preventDefault(); setShowFilters(p => !p) }}>Filter</Link> |{' '}

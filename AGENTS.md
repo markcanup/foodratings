@@ -2,8 +2,10 @@
 
 ## Project
 - Repository name: `foodratings`
+- Canonical repository: `https://github.com/markcanup/foodratings`
 - Stack: React + Vite
-- Primary workspace for Codex: `/workspace
+- Primary workspace for Codex Desktop: `/home/codex/foodratings/source`
+- Primary workspace in the project container: `/workspace`
 - Codex should only read and modify files inside this folder.
 
 ## Workspace
@@ -11,10 +13,17 @@
 - Container path (Codex runtime): `/workspace`
 - Codex will typically operate inside `/workspace`, which is a mounted view of the host repository.
 
+## Git Workflow
+- `origin` must point to `https://github.com/markcanup/foodratings`.
+- Before beginning new work, fetch `origin` and confirm the tracked files on local `main` match `origin/main`.
+- Preserve local untracked environment/helper files unless the user explicitly asks to add or remove them.
+- Create a feature branch from the current `origin/main` for implementation work; use a short, descriptive name such as `codex/<task-name>`.
+- Do not commit or push changes unless explicitly asked.
+
 ## Execution Environment
 - Codex runs inside a containerized Node environment
 - The container has access only to `/workspace`
-- Secrets and environment files are intentionally NOT accessible to Codex
+- Development secrets are injected at runtime and are not stored in the repository.
 - The user performs all builds and runtime testing outside Codex
 
 ## Runtime and secrets
@@ -42,8 +51,7 @@ This is the source code for the Food Ratings application.
 - Do not access, assume, or depend on secrets.
 - Do not require access to environment files outside `~/foodratings`.
 - Do not attempt to run container builds, deploys, or other workflows that require secrets.
-- Do not commit changes unless explicitly asked.
-- Do not push changes unless explicitly asked.
+- Follow the Git workflow above for commits and pushes.
 
 ## Build / Test Expectations
 - The user handles container rebuilds and runtime testing manually.
@@ -56,8 +64,11 @@ This is the source code for the Food Ratings application.
 - Codex may update application code that uses Supabase.
 - Production and development use separate Supabase projects.
 - Never assume production database access.
-- Supabase credentials to the development project can be found in `/workspace/.env`.
+- Development Supabase credentials are injected at runtime; never commit or print them.
 - All schema changes must be represented as migration files in `supabase/migrations`.
+- The migration files are the repository source of truth for table and column definitions, including `external_*` tables.
+- If the development database is ahead of the checked-in migrations, pull or otherwise capture its schema in a new migration before writing code that depends on it; never guess table or column definitions.
+- `supabase/migrations/20261023_external_order_import.sql` records the `external_*` schema applied to both development and production.
 - Do not make undocumented schema-only edits.
 - For local testing, target the development Supabase project only.
 - When a schema change is made, also update any affected app code and documentation.

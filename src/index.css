@@ -32,6 +32,31 @@ h1 {
   margin: 0;
 }
 
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.page-header__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 999px;
+  background: #fff;
+  color: #2b6cb0;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.page-header__action:hover {
+  background: #ebf8ff;
+  text-decoration: none;
+}
+
 input,
 select,
 textarea,

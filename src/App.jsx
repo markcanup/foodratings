@@ -11,6 +11,8 @@ import ViewRestaurant from './components/ViewRestaurant'
 //import EditRating from './components/EditRating'
 import EditRestaurant from './components/EditRestaurant'
 import DishRating from './components/DishRating'
+import AdminPage from './components/AdminPage'
+import RestaurantMerchantCompare from './components/RestaurantMerchantCompare'
 
 function NewDishRoute() {
   const location = useLocation()
@@ -64,6 +66,8 @@ function App() {
         <Route path="/dish/:dishId" element={<DishRating />} />
         <Route path="/dish/:dishId/add-rating" element={<DishRating />} />
         <Route path="/dish/:dishId/edit-rating/:ratingId" element={<DishRating />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/restaurants" element={<RestaurantMerchantCompare />} />
       </Routes>
     </Router>
   )
@@ -75,4 +79,3 @@ function DishRatingWrapper() {
 }
 
 export default App
-
