@@ -5,9 +5,10 @@ with imported `external_merchants` and saves one-to-many associations.
 
 ## Database setup
 
-Apply `supabase/migrations/20261024200000_admin_restaurant_merchant_associations.sql`
-to development before testing the page. After it is verified in development,
-promote the same migration to production before deploying the UI.
+Apply the Supabase migrations in chronological order through
+`supabase/migrations/20261027130000_create_restaurant_from_external_merchant.sql`
+to development before testing the pages. After they are verified in development,
+promote the same migrations to production before deploying the UI.
 
 The migration creates `restaurant_external_merchants`. A restaurant can have
 many external merchants, but each external merchant can belong to only one
@@ -39,3 +40,11 @@ Restaurants appear in the first matching group that applies:
 
 Every group includes a manual merchant selector so unusual names and multiple
 provider records can still be associated.
+
+## Creating a restaurant from a merchant
+
+For allowlisted admins, the Add Restaurant form includes a dropdown containing
+only external merchants that are not already associated. Selecting one fills the
+restaurant name and location from the merchant. Saving creates the restaurant and
+association atomically, so a linkage failure cannot leave behind an extra curated
+restaurant.

@@ -21,6 +21,42 @@
   font-weight: 400;
 }
 
+.external-merchant-source {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #bee3f8;
+  border-radius: 0.65rem;
+  background: #f7fafc;
+}
+
+.external-merchant-source h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.external-merchant-source p {
+  margin: 0 0 0.75rem;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.external-merchant-source label,
+.external-merchant-source small {
+  display: block;
+}
+
+.external-merchant-source select {
+  margin-bottom: 0.5rem;
+}
+
+.external-merchant-source small {
+  color: #718096;
+}
+
+.external-merchant-source .external-merchant-source__error {
+  color: #c53030;
+}
+
 .restaurant-rating-selector {
   margin: 0 0 1.25rem;
   padding: 1rem;

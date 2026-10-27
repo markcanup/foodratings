@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import PageHeader from './PageHeader'
+import PostmatesSync from './PostmatesSync'
 import './admin.css'
 
 export default function AdminPage() {
@@ -42,6 +43,8 @@ export default function AdminPage() {
               associations that future reporting and cleanup tools will use.
             </p>
           </section>
+
+          <PostmatesSync />
 
           <div className="admin-launch-grid">
             <Link to="/admin/restaurants" className="admin-launch-card">
