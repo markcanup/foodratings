@@ -20,6 +20,40 @@
 - Create a feature branch from the current `origin/main` for implementation work; use a short, descriptive name such as `codex/<task-name>`.
 - Do not commit or push changes unless explicitly asked.
 
+### Git object permission workaround
+
+Some legacy loose-object directories under `.git/objects` are owned by another
+workspace user or group. Git may therefore fail during `git add` or `git commit`
+with `insufficient permission for adding an object to repository database`, even
+when refs and the index remain writable. Repacking a completed commit does not
+permanently repair every legacy loose-object directory.
+
+When the user has explicitly requested a commit and this specific error occurs,
+use a temporary alternate object store, then repack the resulting commit into
+the repository's normal pack storage. Run these commands from the repository
+root, replacing the staged paths and commit message as appropriate:
+
+```bash
+foodratings_git_objects=$(mktemp -d /tmp/foodratings-git-objects.XXXXXX)
+
+GIT_OBJECT_DIRECTORY="$foodratings_git_objects" \
+GIT_ALTERNATE_OBJECT_DIRECTORIES="$PWD/.git/objects" \
+git add <paths>
+
+GIT_OBJECT_DIRECTORY="$foodratings_git_objects" \
+GIT_ALTERNATE_OBJECT_DIRECTORIES="$PWD/.git/objects" \
+git commit -m "<message>"
+
+GIT_ALTERNATE_OBJECT_DIRECTORIES="$foodratings_git_objects" git repack -a
+git cat-file -e HEAD^{commit}
+git status --short --branch
+```
+
+Only remove the temporary directory after both verification commands succeed.
+After repacking, ordinary Git commands and a normal `git push` must work without
+the alternate-store environment variables. Do not change ownership recursively
+or leave a branch pointing to objects that exist only in `/tmp`.
+
 ## Execution Environment
 - Codex runs inside a containerized Node environment
 - The container has access only to `/workspace`
@@ -69,6 +103,7 @@ This is the source code for the Food Ratings application.
 - The migration files are the repository source of truth for table and column definitions, including `external_*` tables.
 - If the development database is ahead of the checked-in migrations, pull or otherwise capture its schema in a new migration before writing code that depends on it; never guess table or column definitions.
 - `supabase/migrations/20261023_external_order_import.sql` records the `external_*` schema applied to both development and production.
+- `supabase/migrations/20261030120000_external_sync_requests_realtime.sql` enables immediate queue wake-ups; apply it after the external sync request migration.
 - Do not make undocumented schema-only edits.
 - For local testing, target the development Supabase project only.
 - When a schema change is made, also update any affected app code and documentation.
