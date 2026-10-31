@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import PageHeader from './PageHeader'
+import DishOrderLinker from './DishOrderLinker'
 
 const LAST_SELECTED_DATE_KEY = 'lastSelectedDate'
 const LAST_SELECTED_DATE_TIMESTAMP_KEY = 'lastSelectedDateTimestamp'
@@ -167,6 +168,22 @@ export default function DishRating() {
     }
   }
 
+  const handleOrderDateSelected = async (orderedAt) => {
+    const orderDate = formatDateForInput(orderedAt)
+    if (!orderDate || ratings.length === 0) return
+
+    let targetRatingIndex = -1
+    for (let index = ratings.length - 1; index >= 0; index -= 1) {
+      if (!ratings[index].id) {
+        targetRatingIndex = index
+        break
+      }
+    }
+
+    if (targetRatingIndex === -1) targetRatingIndex = ratings.length - 1
+    await handleRatingChange(targetRatingIndex, 'date_rated', orderDate)
+  }
+
   async function handleDeleteImage() {
     if (!dish || !dish.image_url) return
 
@@ -260,6 +277,12 @@ export default function DishRating() {
         onChange={(e) => handleDishChange('comments', e.target.value)}
         placeholder="Dish comments (e.g., adds/removes)"
         style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+      />
+
+      <DishOrderLinker
+        dish={dish}
+        onDishNameChange={(name) => handleDishChange('name', name)}
+        onOrderDateSelected={handleOrderDateSelected}
       />
 
       <h4>Dish Image</h4>
@@ -360,11 +383,20 @@ export default function DishRating() {
             </div>
           </div>
 
-          <input
-            type="date"
-            value={rating.date_rated || ''}
-            onChange={(e) => handleRatingChange(index, 'date_rated', e.target.value)}
-          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '0.5rem', alignItems: 'start' }}>
+            <input
+              type="date"
+              value={rating.date_rated || ''}
+              onChange={(e) => handleRatingChange(index, 'date_rated', e.target.value)}
+            />
+            <button
+              type="button"
+              style={{ width: 'auto' }}
+              onClick={() => handleRatingChange(index, 'date_rated', formatDateForInput(new Date()))}
+            >
+              Today
+            </button>
+          </div>
           <textarea
             value={rating.comments || ''}
             onChange={(e) => handleRatingChange(index, 'comments', e.target.value)}
@@ -394,10 +426,20 @@ function getDefaultRatingDate() {
   if (!savedDate || Number.isNaN(savedTimestamp) || now - savedTimestamp > RATING_DATE_PREF_WINDOW_MS) {
     localStorage.removeItem(LAST_SELECTED_DATE_KEY)
     localStorage.removeItem(LAST_SELECTED_DATE_TIMESTAMP_KEY)
-    return new Date().toISOString().split('T')[0]
+    return formatDateForInput(new Date())
   }
 
   return savedDate
+}
+
+function formatDateForInput(value) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function formatDishNameInput(previousValue, nextValue) {

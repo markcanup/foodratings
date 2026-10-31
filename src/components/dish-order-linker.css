@@ -1,0 +1,213 @@
+.dish-order-linker {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid #bee3f8;
+  border-radius: 0.65rem;
+  background: #f7fafc;
+  text-align: left;
+}
+
+.dish-order-linker h3 {
+  margin-top: 0;
+}
+
+.dish-order-linker > p {
+  color: #4a5568;
+}
+
+.dish-order-linker__linked {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #9ae6b4;
+  border-radius: 0.5rem;
+  background: #f0fff4;
+}
+
+.dish-order-linker__item-heading,
+.dish-order-linker__linked li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.dish-order-linker__item-heading strong,
+.dish-order-linker__item-heading small,
+.dish-order-linker__linked li strong,
+.dish-order-linker__linked li small,
+.dish-order-linker fieldset span,
+.dish-order-linker fieldset small {
+  display: block;
+}
+
+.dish-order-linker small {
+  margin-top: 0.15rem;
+  color: #4a5568;
+}
+
+.dish-order-linker button {
+  width: auto;
+  margin: 0;
+  border-radius: 0.4rem;
+}
+
+.dish-order-linker .secondary-button {
+  border: 1px solid #90cdf4;
+  background: #fff;
+  color: #2b6cb0;
+}
+
+.dish-order-linker .remove-button {
+  background: transparent;
+  color: #c53030;
+}
+
+.dish-order-linker__component-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dish-order-linker__linked ul {
+  margin: 0.75rem 0 0;
+}
+
+.dish-order-linker__linked li {
+  padding: 0.55rem 0;
+  border-top: 1px solid #c6f6d5;
+}
+
+.dish-order-linker__add {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #cbd5e0;
+}
+
+.dish-order-linker__add > label:first-child,
+.dish-order-linker legend {
+  font-weight: 700;
+}
+
+.dish-order-linker__dropdown {
+  position: relative;
+  margin: 0.35rem 0 1rem;
+}
+
+.dish-order-linker .dish-order-linker__dropdown-toggle {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #a0aec0;
+  background: #fff;
+  color: #2d3748;
+  text-align: left;
+}
+
+.dish-order-linker__dropdown-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  left: 0;
+  max-height: 24rem;
+  overflow-y: auto;
+  border: 1px solid #a0aec0;
+  border-radius: 0.45rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1rem rgba(45, 55, 72, 0.18);
+}
+
+.dish-order-linker .dish-order-linker__dropdown-option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 0;
+  background: #fff;
+  color: #2d3748;
+  text-align: left;
+}
+
+.dish-order-linker .dish-order-linker__dropdown-option:last-child {
+  border-bottom: 0;
+}
+
+.dish-order-linker .dish-order-linker__dropdown-option:hover,
+.dish-order-linker .dish-order-linker__dropdown-option[aria-selected='true'] {
+  background: #ebf8ff;
+}
+
+.dish-order-linker__dropdown-parent strong,
+.dish-order-linker__dropdown-parent small {
+  display: block;
+}
+
+.dish-order-linker__dropdown-customizations {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding-left: 0.75rem;
+  color: #4a5568;
+}
+
+.dish-order-linker__dropdown-customizations > span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: start;
+}
+
+.dish-order-linker__dropdown-customizations > span.is-linked {
+  color: #718096;
+}
+
+.dish-order-linker__dropdown-customizations small {
+  display: block;
+}
+
+.dish-order-linker fieldset {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.45rem;
+}
+
+.dish-order-linker fieldset label {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0.4rem 0;
+}
+
+.dish-order-linker input[type='checkbox'] {
+  width: auto;
+  margin: 0.2rem 0 0;
+}
+
+.dish-order-linker__name-source {
+  display: block;
+  font-weight: 600;
+}
+
+.dish-order-linker__name-source select {
+  margin-top: 0.35rem;
+  font-weight: 400;
+}
+
+.dish-order-linker__status {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.dish-order-linker__error {
+  color: #c53030 !important;
+}
+
+@media (max-width: 640px) {
+  .dish-order-linker__item-heading,
+  .dish-order-linker__linked li {
+    grid-template-columns: 1fr;
+  }
+}

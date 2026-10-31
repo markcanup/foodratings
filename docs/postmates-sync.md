@@ -4,11 +4,12 @@ Food Ratings administrators can request a Postmates history sync from the admin
 page. The browser only inserts a queue record through an admin-only Supabase RPC.
 It never receives the Postmates session or the Supabase server secret.
 
-The `postmates-sync` helper polls the selected development or production queue
-from the Ubuntu server, claims one request at a time, reads provider history with
-the encrypted saved session, and loads the provider order IDs already stored for
-that external account. It imports only history records whose provider order ID is
-absent from `external_orders`.
+The `postmates-sync` helper subscribes to the selected development or production
+queue from the Ubuntu server and uses mealtime-aware fallback polling for missed
+events or requests queued while it was offline. It claims one request at a time,
+reads provider history with the encrypted saved session, and loads the provider
+order IDs already stored for that external account. It imports only history
+records whose provider order ID is absent from `external_orders`.
 The database uniqueness constraint on `(external_account_id, provider_order_id)`
 remains the final duplicate-write safeguard.
 
@@ -16,12 +17,16 @@ remains the final duplicate-write safeguard.
 
 1. Apply `supabase/migrations/20261027120000_external_sync_requests.sql` to the
    development Supabase project.
-2. Add both projects' URLs and corresponding server secret keys to the protected
+2. Apply `supabase/migrations/20261030120000_external_sync_requests_realtime.sql`
+   to add the request queue to the Supabase Realtime publication.
+3. Add both projects' URLs and corresponding server secret keys to the protected
    `postmates-sync` `supabase.json`, then rebuild and restart that service. Its
    dashboard shows the URLs but never the keys.
-3. In the helper dashboard, select **Development** for local testing. The selected
-   environment controls both queue polling and imports and persists across restarts.
-4. Rebuild Food Ratings, sign in as an allowlisted app administrator, open Admin,
+4. In the helper dashboard, select **Development** for local testing. The selected
+   environment controls the Realtime subscription, fallback checks, and imports
+   and persists across restarts. Configure the mealtime window, time zone, and
+   separate fallback frequencies there as needed.
+5. Rebuild Food Ratings, sign in as an allowlisted app administrator, open Admin,
    and select **Sync Postmates now**.
 
 A request stays queued while the helper is offline. Failed requests display a
