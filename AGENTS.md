@@ -12,6 +12,11 @@
 - Host path: `~/foodratings/source`
 - Container path (Codex runtime): `/workspace`
 - Codex will typically operate inside `/workspace`, which is a mounted view of the host repository.
+- The companion `postmates-sync` helper is available from the Food Ratings
+  top-level directory through the `../postmates-sync` symlink. Follow that
+  symlink when a task concerns provider login, history pagination, imports, or
+  the background sync worker, and read the helper's own `AGENTS.md` before
+  changing it.
 
 ## Git Workflow
 - `origin` must point to `https://github.com/markcanup/foodratings`.

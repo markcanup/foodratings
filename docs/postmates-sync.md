@@ -8,8 +8,10 @@ The `postmates-sync` helper subscribes to the selected development or production
 queue from the Ubuntu server and uses mealtime-aware fallback polling for missed
 events or requests queued while it was offline. It claims one request at a time,
 reads provider history with the encrypted saved session, and loads the provider
-order IDs already stored for that external account. It imports only history
-records whose provider order ID is absent from `external_orders`.
+order IDs already stored for that external account. It scans newest-to-oldest,
+continues through pages containing new or mixed orders, and stops after a complete
+page contains only stored IDs. It imports only history records whose provider
+order ID is absent from `external_orders`.
 The database uniqueness constraint on `(external_account_id, provider_order_id)`
 remains the final duplicate-write safeguard.
 
